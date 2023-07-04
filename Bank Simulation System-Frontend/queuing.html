@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Simulation/Features/Queuing Model </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+
+</head>
+
+<body id="queueing">
+  <!-- nav bar  -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">BankHub</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ml-9">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="services.html">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="customers.html">Customers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="Counters.html">Counters</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="features.html" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Features
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="simulation.html">Simulation</a></li>
+              <li><a class="dropdown-item" href="#">Queueing Model</a></li>
+              <li><a class="dropdown-item" href="analysis.html">Analyze</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- nav bar end    -->
+  <h1 align="center"> QUEUEING SYSTEM</h1>
+  <!-- form  -->
+
+  <div class="container">
+    <form id="averageForm">
+      <div class="mb-3">
+        <label for="timeSelect" class="form-label">Calculate Queueing Parameters:</label>
+        <select id="timeSelect" name="time" class="form-select">
+          <option value="All">All</option>
+          <option value="Wq">Wq</option>
+          <option value="Lq">Lq</option>
+          <option value="W">W</option>
+          <option value="L">L</option>
+          <option value="P">P</option>
+        </select>
+      </div>
+      <button class="form-button" onclick="calculateQueueingParameters()">Calculate</button>
+    </form>
+  
+    
+      <div id="result"></div>
+    </div>
+
+
+  <!-- form end  -->
+
+</body>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    function calculateQueueingParameters(event) {
+      event.preventDefault(); // Prevent form submission behavior
+
+      const arrivalRate = 7.466667;
+      const serviceRate = 8.946666667;
+
+      const lambda = 1 / arrivalRate;
+      const mu = 1 / serviceRate;
+      const c = 4;
+      const p = lambda / (c * mu);
+      const Po = 1 / (
+        1 + (c * p) + (((c * p) ** 2) / 2) + (((c * p) ** 3) / 6) + (((c * p) ** 4) / (24 * (1 - p)))
+      );
+      const Lq = (Po * ((lambda / mu) ** 4) * p) / (24 * ((1 - p) ** 2));
+      const Wq = Lq / lambda;
+      const W = Wq + (1 / mu);
+      const L = lambda * W;
+      const selectElement = document.getElementById("timeSelect");
+      const selectedOption = selectElement.options[selectElement.selectedIndex].value;
+
+      let resultText = "";
+
+      if (selectedOption === "All") {
+        resultText += `<p>Wq (Average time spent in the queue): ${Wq.toFixed(2)}</p>`;
+        resultText += `<p>Lq (Average number of customers in the queue): ${Lq.toFixed(2)}</p>`;
+        resultText += `<p>W (Average total time spent in the system): ${W.toFixed(2)}</p>`;
+        resultText += `<p>L (Average number of customers in the system): ${L.toFixed(2)}</p>`;
+        resultText += `<p>P (Server Utilization): ${p.toFixed(2)}</p>`;
+      } else if (selectedOption === "Wq") {
+        resultText = `<p>Wq (Average time spent in the queue): ${Wq.toFixed(2)}</p>`;
+      } else if (selectedOption === "Lq") {
+        resultText = `<p>Lq (Average number of customers in the queue): ${Lq.toFixed(2)}</p>`;
+      } else if (selectedOption === "W") {
+        resultText = `<p>W (Average total time spent in the system): ${W.toFixed(2)}</p>`;
+      } else if (selectedOption === "L") {
+        resultText = `<p>L (Average number of customers in the system): ${L.toFixed(2)}</p>`;
+      } else if (selectedOption === "P") {
+        resultText = `<p>Server Utilization (P): ${p.toFixed(2)}</p>`;
+      }
+
+      const resultElement = document.getElementById("result");
+      resultElement.innerHTML = resultText;
+    }
+
+    const calculateButton = document.querySelector(".form-button");
+    calculateButton.addEventListener("click", calculateQueueingParameters);
+  });
+  </script>
+
+</html>
