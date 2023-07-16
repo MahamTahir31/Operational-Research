@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Simulation/Features/Simulation </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+</head>
+
+<body id="simulation">
+  <!-- nav bar  -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">BankHub</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ml-9">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="services.html">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="customers.html">Customers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="Counters.html">Counters</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="features.html" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Features
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Simulation</a></li>
+              <li><a class="dropdown-item" href="queuing.html">Queueing Model</a></li>
+              <li><a class="dropdown-item" href="analysis.html">Analyze</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- nav bar end    -->
+  <h1 align="center"> SIMULATE CUSTOMER DETAILS</h1>
+
+  <!-- form  -->
+  <div class="simulation-container">
+    <div class="container mt-3">
+      <form id="averageForm">
+        <div class="mb-3">
+          <label for="modelSelect" class="form-label">Select a Model:</label>
+          <select id="modelSelect" name="model" class="form-select">
+            <option value="M/M/C">M/M/C</option>
+            <option value="M/G/C">M/G/C</option>
+            <option value="G/G/C">G/G/C</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="serversInput" class="form-label">Enter Number of Servers:</label>
+          <input type="number" id="serversInput" name="servers" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="timeSelect" class="form-label">Select Distribution For Arrival Time:</label>
+          <select id="arrivalDistributionSelect" name="arrivalDistribution" class="form-select">
+            <option value="Poisson">Poisson</option>
+            <option value="Exponential">Exponential</option>
+            <option value="Uniform">Uniform</option>
+            <option value="Normal">Normal</option>
+            <option value="Gamma">Gamma</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="timeSelect" class="form-label">Select Distribution For Service Time:</label>
+          <select id="serviceDistributionSelect" name="serviceDistribution" class="form-select">
+            <option value="Poisson">Poisson</option>
+            <option value="Exponential">Exponential</option>
+            <option value="Uniform">Uniform</option>
+            <option value="Normal">Normal</option>
+            <option value="Gamma">Gamma</option>
+          </select>
+        </div>
+        <div>
+          <label for="lambdaInput" class="form-label">Enter Arrival Rate (λ):</label>
+          <input type="number" id="lambdaInput" name="lambda" class="form-control" step="0.01" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="muInput" class="form-label">Enter Service Rate (μ):</label>
+          <input type="number" id="muInput" name="mu" class="form-control" step="0.01" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Calculate</button>
+      </form>
+    </div>
+
+    <table id="customersTable">
+      <thead>
+        <tr>
+          <th>Customers</th>
+          <th>Probability</th>
+          <th>Arrival</th>
+          <th>Service</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>InterArrival</th>
+          <th>TurnAround</th>
+          <th>Wait</th>
+          <th>Response</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Table rows will be dynamically generated using JavaScript -->
+      </tbody>
+    </table>
+
+  </div>
+  <!-- form end  -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    document.getElementById("averageForm").addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Retrieve user input values
+      var selectedModel = document.getElementById("modelSelect").value;
+      var numServers = parseInt(document.getElementById("serversInput").value);
+      var arrivalDistribution = document.getElementById("arrivalDistributionSelect").value;
+      var serviceDistribution = document.getElementById("serviceDistributionSelect").value;
+      var arrivalRate = parseFloat(document.getElementById("lambdaInput").value);
+      var serviceRate = parseFloat(document.getElementById("muInput").value);
+      // Perform calculations and populate the table
+      calculateAndPopulateTable(selectedModel, numServers, arrivalDistribution, serviceDistribution, arrivalRate, serviceRate);
+    });
+
+    function calculateAndPopulateTable(selectedModel, numServers, arrivalDistribution, serviceDistribution, arrivalRate, serviceRate) {
+      var tableBody = document.querySelector("#customersTable tbody");
+
+      // Clear any existing table rows
+      tableBody.innerHTML = "";
+
+      // Calculate inter-arrival time and service time
+      var interArrivalTime = 1 / arrivalRate;
+      var serviceTime = 1 / serviceRate;
+
+      var cumulativeProbability = 0;
+      var customerNumber = 1;
+      var randomCustomers = 1;
+      var variance = Math.pow(serviceRate, 2); // Calculate the variance
+
+      var maxCustomers = 12; // Maximum number of customers to generate
+      if (arrivalDistribution === "Gamma") {
+        maxCustomers = 50;
+      }
+      else {
+        maxCustomers = 12;
+      }
+      while (cumulativeProbability < 1 && customerNumber <= maxCustomers) {
+        // Calculate probability based on the selected distribution
+        var arrivalProbability = 0;
+
+        if (selectedModel === "M/M/C" && arrivalDistribution === "Poisson") {
+          arrivalProbability = calculatePoissonProbability(arrivalRate, customerNumber - 1);
+        }
+        else if (selectedModel === "M/M/C" && arrivalDistribution === "Exponential") {
+          if (customerNumber === 1) {
+            arrivalProbability = calculateExponentialProbability(arrivalRate, customerNumber - 1);
+          }
+          else {
+            arrivalProbability = calculateExponentialProbability(arrivalRate, customerNumber - 1) - calculateExponentialProbability(arrivalRate, customerNumber - 2);
+          }
+        }
+        else if (selectedModel === "G/G/C" && arrivalDistribution === "Uniform") {
+          arrivalProbability = calculateUniformProbability();
+        }
+        else if (selectedModel === "G/G/C" && arrivalDistribution === "Normal") {
+          arrivalProbability = calculateNormalProbability(variance);
+        }
+        else if (selectedModel === "G/G/C" && arrivalDistribution === "Gamma") {
+          arrivalProbability = calculateGammaProbability(arrivalRate, customerNumber);
+        }
+        else if (selectedModel === "M/G/C" && arrivalDistribution === "Poisson") {
+          arrivalProbability = calculatePoissonProbability(arrivalRate, customerNumber - 1);
+
+        }
+
+        else if (selectedModel === "M/G/C" && arrivalDistribution === "Exponential") {
+          if (customerNumber === 1) {
+            arrivalProbability = calculateExponentialProbability(arrivalRate, customerNumber - 1);
+          }
+          else {
+            arrivalProbability = calculateExponentialProbability(arrivalRate, customerNumber - 1) - calculateExponentialProbability(arrivalRate, customerNumber - 2);
+          }
+        }
+
+        // Add the previous cumulative probability to the current probability
+        var updatedProbability = arrivalProbability + cumulativeProbability;
+
+        // Break the loop if the probability reaches 1 and if the maximum number of customers is reached
+        if (updatedProbability >= 1 && customerNumber > maxCustomers) {
+          break;
+        }
+
+
+        // Create a new row
+        var row = document.createElement("tr");
+
+        // Calculate and set the values for each column
+        var arrival = customerNumber === 1 ? 0 : parseFloat(tableBody.rows[customerNumber - 2]?.cells[2]?.textContent ?? 0) + parseFloat(tableBody.rows[customerNumber - 2]?.cells[6]?.textContent ?? 0);
+        if (serviceDistribution === "Poisson") {
+          var service = Math.ceil(-serviceRate * Math.log(Math.random()));
+        }
+        else if (serviceDistribution === "Exponential") {
+          var service = Math.ceil((Math.log(1 - Math.random())) / -serviceRate);
+        }
+        else if (serviceDistribution === "Uniform") {
+          var minServiceTime = 0;
+          var maxServiceTime = 1;
+          var service = Math.ceil(minServiceTime + Math.random() * (maxServiceTime - minServiceTime));
+
+        }
+        else if (serviceDistribution === "Normal") {
+          // Gathered or assumed values
+          var mean = 5; // Average service time
+          var stdDev = Math.sqrt(variance);
+          // Standard deviation of service time
+
+          var u = 0, v = 0;
+          while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+          while (v === 0) v = Math.random(); // Converting [0,1) to (0,1)
+          var standardNormal = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+          var service = Math.ceil(mean + stdDev * standardNormal);
+
+        }
+        else if (serviceDistribution === "Gamma") {
+          var k = customerNumber-1;
+          var scale = 1/arrivalRate;
+          var service = Math.ceil(gammaDistributionRandom(k, scale));
+
+        }
+        function gammaDistributionRandom(k, scale) {
+          var b = k - 1.0;
+          var c = 3.0 * k - 0.75;
+          var valid = false;
+          var u, v, w, y, z;
+
+          while (!valid) {
+            u = Math.random();
+            v = Math.random();
+
+            w = u * (1.0 - u);
+            y = Math.sqrt(c / w) * (u - 0.5);
+            z = b + y;
+
+            if (z >= 0) {
+              var tmp = 64.0 * w * w * w * v * v;
+              valid = (y * y <= (tmp - 2.0 * z * z / z) || Math.log(tmp) <= 2.0 * (b * Math.log(z / b) - y));
+            }
+          }
+
+          return z * scale;
+        }
+
+        var start = Math.max(arrival, parseFloat(tableBody.rows[customerNumber - 2]?.cells[5]?.textContent ?? 0));
+        var end = start + service;
+        var interArrival = 0;
+
+        // Calculate inter-arrival time using Rand() and assign value to the cell
+        if (randomCustomers === 0) {
+          interArrival = 0;
+        } else {
+          var randValue = Math.random();
+          for (var i = 1; i <= customerNumber; i++) {
+            var lowerBound = parseFloat(tableBody.rows[i - 1]?.cells[1]?.textContent ?? 0);
+            var upperBound = parseFloat(tableBody.rows[i - 1]?.cells[1]?.textContent ?? 0) + parseFloat(tableBody.rows[i - 1]?.cells[9]?.textContent ?? 0);
+            if (randValue >= lowerBound && randValue < upperBound) {
+              interArrival = parseFloat(tableBody.rows[i - 1]?.cells[7]?.textContent ?? 0);
+              break;
+            }
+          }
+        }
+
+        var turnAround = end - arrival;
+        var wait = start - arrival;
+        var response = wait + service;
+
+        // Set the values in the row
+        row.innerHTML = `
+      <td>${customerNumber}</td>
+      <td>${updatedProbability.toFixed(5)}</td>
+      <td>${arrival.toFixed(2)}</td>
+      <td>${service.toFixed(2)}</td>
+      <td>${start.toFixed(2)}</td>
+      <td>${end.toFixed(2)}</td>
+      <td>${interArrival.toFixed(2)}</td>
+      <td>${turnAround.toFixed(2)}</td>
+      <td>${wait.toFixed(2)}</td>
+      <td>${response.toFixed(2)}</td>
+    `;
+
+        // Append the row to the table body
+        tableBody.appendChild(row);
+
+        // Increment the customer number and random customers count
+        customerNumber++;
+        randomCustomers++;
+
+        // Update the cumulative probability
+        cumulativeProbability = updatedProbability;
+      }
+
+      // Show the table on the webpage
+      var table = document.getElementById("customersTable");
+      table.style.display = "table";
+
+      console.log("Number of Randomly Simulated Customers:", randomCustomers);
+    }
+
+
+    // Function to calculate Poisson probability
+    function calculatePoissonProbability(lambda, k) {
+      var numerator = Math.pow(lambda, k) * Math.exp(-lambda);
+      var denominator = factorial(k);
+      return numerator / denominator;
+    }
+
+    // Function to calculate exponential probability
+    function calculateExponentialProbability(lambda, k) {
+      return 1 - Math.exp(-lambda * k);
+    }
+
+    // Function to calculate uniform probability
+    function calculateUniformProbability() {
+      const min = 0; // Minimum value
+      const max = 1; // Maximum value
+      return min + Math.random() * (max - min);
+    }
+
+    // Function to calculate Normal probability using CDF
+    function calculateNormalProbability(variance) {
+      var u = 0, v = 0;
+      while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+      while (v === 0) v = Math.random(); // Converting [0,1) to (0,1)
+      var standardNormal = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+      var normalValue = Math.sqrt(variance) * standardNormal;
+
+      // Calculate probability using CDF
+      var probability = 0.5 * (1 + erf(normalValue / Math.sqrt(2)));
+
+      return probability;
+    }
+    // Function to calculate Gamma probability using CDF
+    function calculateGammaProbability(lambda, k) {
+      if (k < 0) {
+        return 0;
+      }
+      let cumulativeProb = 0;
+      let shape = Math.round(lambda * (k + 1));
+      let scale = 1 / lambda;
+      let term = 1 / shape;
+      let sum = term;
+      while (sum > Math.exp(-6)) {
+        cumulativeProb += sum;
+        shape++;
+        term *= k / shape;
+        sum = term / (shape + 1);
+      }
+      return cumulativeProb * Math.exp(-k * scale);
+    }
+
+
+    // Error function (approximation) for CDF calculation
+    function erf(x) {
+      var a1 = 0.254829592;
+      var a2 = -0.284496736;
+      var a3 = 1.421413741;
+      var a4 = -1.453152027;
+      var a5 = 1.061405429;
+      var p = 0.3275911;
+      var t = 1.0 / (1.0 + p * Math.abs(x));
+      var y = ((((a5 * t + a4) * t) + a3) * t + a2) * t + a1;
+      return 1 - (y * Math.exp(-x * x));
+    }
+
+
+    // Function to calculate factorial
+    function factorial(n) {
+      if (n === 0 || n === 1) {
+        return 1;
+      }
+      return n * factorial(n - 1);
+    }
+  </script>
+</body>
+
+</html>

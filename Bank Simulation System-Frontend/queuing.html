@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Simulation/Features/Queuing Model </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+
+</head>
+
+<body id="queueing">
+  <!-- nav bar  -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">BankHub</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ml-9">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="services.html">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="customers.html">Customers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="Counters.html">Counters</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="features.html" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Features
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="simulation.html">Simulation</a></li>
+              <li><a class="dropdown-item" href="#">Queueing Model</a></li>
+              <li><a class="dropdown-item" href="analysis.html">Analyze</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- nav bar end    -->
+  <h1 align="center"> QUEUEING SYSTEM</h1>
+  <!-- form  -->
+
+  <div class="container">
+    <form id="averageForm">
+      <div class="mb-3">
+        <label for="daySelect" class="form-label">Select a Model:</label>
+        <select id="daySelect" name="day" class="form-select">
+          <option value="M/M/C">M/M/C</option>
+          <option value="M/G/C">M/G/C</option>
+          <option value="G/G/C">G/G/C</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="serversInput" class="form-label">Enter Number of Servers:</label>
+        <input type="number" id="serversInput" name="servers" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="arrivalSelect" class="form-label">Select Distribution For Arrival Time:</label>
+        <select id="arrivalSelect" name="arrival" class="form-select">
+          <option value="Poisson">Poisson</option>
+          <option value="Exponential">Exponential</option>
+          <option value="Uniform">Uniform</option>
+          <option value="Normal">Normal</option>
+          <option value="Gamma">Gamma</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="serviceSelect" class="form-label">Select Distribution For Service Time:</label>
+        <select id="serviceSelect" name="service" class="form-select">
+          <option value="Poisson">Poisson</option>
+          <option value="Exponential">Exponential</option>
+          <option value="Uniform">Uniform</option>
+          <option value="Normal">Normal</option>
+          <option value="Gamma">Gamma</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="lambdaInput" class="form-label">Enter Arrival Rate (λ):</label>
+        <input type="number" id="lambdaInput" name="lambda" class="form-control" step="0.01" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="muInput" class="form-label">Enter Service Rate (μ):</label>
+        <input type="number" id="muInput" name="mu" class="form-control" step="0.01" required>
+      </div>
+      <button class="form-button">Calculate</button>
+    </form>
+
+  </div>
+  <div id="result"></div>
+
+  <!-- form end  -->
+
+</body>
+<script>
+  document.getElementById("averageForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Retrieve user input values
+    var selectedModel = document.getElementById("daySelect").value;
+    var numServers = parseInt(document.getElementById("serversInput").value);
+    var arrivalDistribution = document.getElementById("arrivalSelect").value;
+    var serviceDistribution = document.getElementById("serviceSelect").value;
+    var arrivalRate = parseFloat(document.getElementById("lambdaInput").value);
+    var serviceRate = parseFloat(document.getElementById("muInput").value);
+
+    // Calculate queueing parameters based on the selected model and distributions
+    var Lq, Wq, L, W, rho, Po;
+
+    if (selectedModel === "M/M/C") {
+
+      // Calculate traffic intensity (ρ)
+      rho = arrivalRate / (numServers * serviceRate);
+
+      // Calculate Lq (average number of customers in the queue)
+      var numerator = Math.pow(rho, numServers) * (1 - Math.pow(rho, numServers - 1));
+      var denominator = factorial(numServers - 1) * (1 - rho);
+      Lq = numerator / denominator;
+
+      // Calculate Wq (average waiting time in the queue)
+      Wq = Lq / (arrivalRate * (1 - rho));
+
+      // Calculate L (average number of customers in the system)
+      L = Lq + (arrivalRate / serviceRate);
+
+      // Calculate W (average time spent in the system)
+      W = L / (arrivalRate * (1 - rho));
+    } 
+    else if (selectedModel === "G/G/C") {
+      // Calculate traffic intensity (ρ)
+      rho = arrivalRate / (numServers * serviceRate);
+
+      // Calculate Lq (average number of customers in the queue)
+      var numerator = Math.pow(rho, numServers) * (1 - Math.pow(rho, numServers - 1));
+      var denominator = factorial(numServers - 1) * (1 - rho);
+      Lq = numerator / denominator;
+
+      // Calculate Wq (average waiting time in the queue)
+      Wq = Lq / (arrivalRate * (1 - rho));
+
+      // Calculate L (average number of customers in the system)
+      L = Lq + (arrivalRate / serviceRate);
+
+      // Calculate W (average time spent in the system)
+      W = L / (arrivalRate * (1 - rho));
+    } 
+    
+    else if (selectedModel === "M/G/C") {
+
+      // Calculate traffic intensity (ρ)
+      rho = arrivalRate / (numServers * serviceRate);
+
+      // Calculate Po
+      Po = 1 / (
+        1 + (numServers * rho) + (((numServers * rho) ** 2) / 2) + (((numServers * rho) ** 3) / 6) + (((numServers * rho) ** 4) / (24 * (1 - rho)))
+      );
+
+      // Calculate Lq (average number of customers in the queue)
+      Lq = (Po * ((arrivalRate / serviceRate) ** 4) * rho) / (24 * ((1 - rho) ** 2));
+
+      // Calculate Wq (average waiting time in the queue)
+      Wq = Lq / arrivalRate;
+
+      // Calculate W (average time spent in the system)
+      W = Wq + (1 / serviceRate);
+
+      // Calculate L (average number of customers in the system)
+      L = arrivalRate * W;
+    }
+
+    // Display the calculated queueing parameters
+    var resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = `
+    <p>Lq: ${Lq}</p>
+    <p>Wq: ${Wq}</p>
+    <p>L: ${L}</p>
+    <p>W: ${W}</p>
+    <p>ρ: ${rho}</p>
+  `;
+  });
+
+  // Function to calculate factorial
+  function factorial(n) {
+    if (n === 0 || n === 1) {
+      return 1;
+    }
+    return n * factorial(n - 1);
+  }
+
+
+</script>
+
+</html>
